@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Management System</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Reset & Base ─────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      color: #e0e0e0;
+    }
+
+    /* ── Layout ───────────────────────────────────────── */
+    header {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 18px 40px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    header .logo { font-size: 28px; }
+    header h1   { font-size: 1.5rem; font-weight: 700; color: #fff; }
+    header p    { font-size: 0.8rem; color: #90caf9; margin-top: 2px; }
+
+    nav {
+      display: flex;
+      gap: 0;
+      background: rgba(255,255,255,0.04);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 0 40px;
+    }
+    .tab-btn {
+      padding: 14px 28px;
+      border: none;
+      background: transparent;
+      color: #90caf9;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.25s;
+      font-family: inherit;
+    }
+    .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .tab-btn.active {
+      color: #fff;
+      border-bottom: 3px solid #42a5f5;
+      background: rgba(66,165,245,0.08);
+    }
+
+    main { padding: 36px 40px; max-width: 1100px; margin: 0 auto; }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Cards ────────────────────────────────────────── */
+    .card {
+      background: rgba(255,255,255,0.07);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* ── Buttons ──────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn-primary { background: #1565c0; color: #fff; }
+    .btn-primary:hover { background: #1976d2; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(25,118,210,0.4); }
+    .btn-success { background: #2e7d32; color: #fff; }
+    .btn-success:hover { background: #388e3c; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(46,125,50,0.4); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── Status / Alerts ──────────────────────────────── */
+    .alert {
+      padding: 12px 18px;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      animation: fadeIn 0.3s ease;
+    }
+    .alert-info    { background: rgba(21,101,192,0.25); border: 1px solid rgba(21,101,192,0.5); color: #90caf9; }
+    .alert-success { background: rgba(46,125,50,0.25);  border: 1px solid rgba(46,125,50,0.5);  color: #a5d6a7; }
+    .alert-error   { background: rgba(183,28,28,0.25);  border: 1px solid rgba(183,28,28,0.5);  color: #ef9a9a; }
+    .alert-warn    { background: rgba(230,81,0,0.25);   border: 1px solid rgba(230,81,0,0.5);   color: #ffcc80; }
+    .alert-icon    { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+    @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ── Table ────────────────────────────────────────── */
+    .table-wrap { overflow-x: auto; border-radius: 10px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    thead th {
+      background: rgba(21,101,192,0.35);
+      color: #90caf9;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+    }
+    tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      transition: background 0.15s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.06); }
+    tbody td { padding: 13px 16px; color: #ddd; vertical-align: middle; }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-a  { background: rgba(46,125,50,0.3);  color: #a5d6a7; border: 1px solid rgba(46,125,50,0.5); }
+    .badge-b  { background: rgba(21,101,192,0.3); color: #90caf9; border: 1px solid rgba(21,101,192,0.5); }
+    .badge-c  { background: rgba(230,81,0,0.3);   color: #ffcc80; border: 1px solid rgba(230,81,0,0.5); }
+    .badge-na { background: rgba(100,100,100,0.3); color: #bbb;   border: 1px solid rgba(100,100,100,0.5); }
+
+    .meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .count-badge {
+      background: rgba(21,101,192,0.3);
+      color: #90caf9;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    /* ── Spinner ──────────────────────────────────────── */
+    .spinner {
+      width: 36px; height: 36px;
+      border: 4px solid rgba(255,255,255,0.1);
+      border-top: 4px solid #42a5f5;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 32px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Form ─────────────────────────────────────────── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    label { font-size: 0.82rem; font-weight: 600; color: #90caf9; }
+    label .req { color: #ef9a9a; margin-left: 2px; }
+
+    input, select {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: #fff;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    input::placeholder { color: rgba(255,255,255,0.3); }
+    input:focus, select:focus {
+      border-color: #42a5f5;
+      box-shadow: 0 0 0 3px rgba(66,165,245,0.2);
+    }
+    input.error-field { border-color: #ef5350; }
+    select option { background: #1a1a2e; }
+
+    .field-error { font-size: 0.78rem; color: #ef9a9a; margin-top: 2px; }
+
+    .form-footer {
+      margin-top: 24px;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* ── HTTP Info Box ─────────────────────────────────── */
+    .http-info {
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.82rem;
+      color: #aaa;
+      margin-top: 18px;
+    }
+    .http-info strong { color: #fff; }
+    .code-method { display: inline-block; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.78rem; margin-right: 6px; }
+    .get-m  { background: #1565c0; color: #fff; }
+    .post-m { background: #2e7d32; color: #fff; }
+    .http-codes { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .hc { padding: 2px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 600; }
+    .hc-200 { background: rgba(46,125,50,0.3); color:#a5d6a7; }
+    .hc-201 { background: rgba(21,101,192,0.3); color:#90caf9; }
+    .hc-400 { background: rgba(230,81,0,0.3);   color:#ffcc80; }
+    .hc-404 { background: rgba(183,28,28,0.3);  color:#ef9a9a; }
+    .hc-409 { background: rgba(123,31,162,0.3); color:#ce93d8; }
+
+    @media (max-width: 680px) {
+      main { padding: 20px; }
+      header { padding: 14px 20px; }
+      nav { padding: 0 16px; }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ───────────────────────────────────────────────────────────────── -->
+<header>
+  <span class="logo">🎓</span>
+  <div>
+    <h1>Student Management System</h1>
+    <p>REST API Demo — GET &amp; POST Methods</p>
+  </div>
+</header>
+
+<!-- ── Navigation Tabs ──────────────────────────────────────────────────────── -->
+<nav>
+  <button class="tab-btn active" onclick="switchTab('students')">📋 Student List</button>
+  <button class="tab-btn"        onclick="switchTab('register')">➕ Register Student</button>
+</nav>
+
+<!-- ── Main Content ──────────────────────────────────────────────────────────── -->
+<main>
+
+  <!-- ═══ TAB 1 : Student List (GET) ═════════════════════════════════════════ -->
+  <div id="tab-students" class="tab-panel active">
+
+    <div class="card">
+      <div class="card-title">📋 All Students <span style="font-size:.8rem;color:#90caf9;font-weight:400">(GET /api/students)</span></div>
+
+      <div id="list-status"></div>
+
+      <div class="meta-row" id="meta-row" style="display:none">
+        <span id="student-count" class="count-badge"></span>
+        <button class="btn btn-primary" onclick="fetchStudents()">🔄 Refresh</button>
+      </div>
+
+      <div id="table-container">
+        <div class="spinner"></div>
+      </div>
+
+      <!-- HTTP Info -->
+      <div class="http-info">
+        <strong>API Call:</strong>
+        <span class="code-method get-m">GET</span>
+        <code>http://localhost:3000/api/students</code>
+        <div class="http-codes">
+          <span class="hc hc-200">200 OK — success</span>
+          <span class="hc hc-404">404 Not Found — route missing</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-students -->
+
+
+  <!-- ═══ TAB 2 : Register Student (POST) ════════════════════════════════════ -->
+  <div id="tab-register" class="tab-panel">
+
+    <div class="card">
+      <div class="card-title">➕ Register New Student <span style="font-size:.8rem;color:#90caf9;font-weight:400">(POST /api/students)</span></div>
+
+      <div id="form-status"></div>
+
+      <form id="register-form" novalidate>
+        <div class="form-grid">
+
+          <div class="form-group">
+            <label for="f-name">Full Name <span class="req">*</span></label>
+            <input type="text" id="f-name" name="name" placeholder="e.g. John Doe" autocomplete="off" />
+            <span class="field-error" id="err-name"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="f-age">Age <span class="req">*</span></label>
+            <input type="number" id="f-age" name="age" placeholder="e.g. 20" min="1" max="120" />
+            <span class="field-error" id="err-age"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="f-email">Email Address <span class="req">*</span></label>
+            <input type="email" id="f-email" name="email" placeholder="e.g. john@college.edu" />
+            <span class="field-error" id="err-email"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="f-course">Course <span class="req">*</span></label>
+            <input type="text" id="f-course" name="course" placeholder="e.g. Computer Science" />
+            <span class="field-error" id="err-course"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="f-grade">Grade</label>
+            <select id="f-grade" name="grade">
+              <option value="N/A">— Select Grade —</option>
+              <option value="A+">A+</option>
+              <option value="A">A</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B">B</option>
+              <option value="B-">B-</option>
+              <option value="C+">C+</option>
+              <option value="C">C</option>
+              <option value="N/A">N/A</option>
+            </select>
+          </div>
+
+        </div><!-- /form-grid -->
+
+        <div class="form-footer">
+          <button type="submit" class="btn btn-success" id="submit-btn">✅ Register Student</button>
+          <button type="button" class="btn btn-primary" onclick="resetForm()">🔄 Reset</button>
+        </div>
+      </form>
+
+      <!-- HTTP Info -->
+      <div class="http-info" style="margin-top:24px">
+        <strong>API Call:</strong>
+        <span class="code-method post-m">POST</span>
+        <code>http://localhost:3000/api/students</code>
+        &nbsp;— Body: <code>application/json</code>
+        <div class="http-codes">
+          <span class="hc hc-201">201 Created — student added</span>
+          <span class="hc hc-400">400 Bad Request — validation error</span>
+          <span class="hc hc-409">409 Conflict — duplicate email</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Last API response (raw) -->
+    <div class="card" id="response-card" style="display:none">
+      <div class="card-title">🔍 Last API Response</div>
+      <pre id="response-pre" style="font-size:0.82rem;color:#a5d6a7;white-space:pre-wrap;word-break:break-word;"></pre>
+    </div>
+
+  </div><!-- /tab-register -->
+
+</main>
+
+
+<script>
+  /* ══════════════════════════════════════════════════════════════════
+   *  SHARED UTILITIES
+   * ══════════════════════════════════════════════════════════════════ */
+  const API_BASE = 'http://localhost:3000/api';
+
+  /** Render an alert banner into a container element */
+  function showAlert(containerId, type, icon, message) {
+    const el = document.getElementById(containerId);
+    el.innerHTML = `
+      <div class="alert alert-${type}">
+        <span class="alert-icon">${icon}</span>
+        <div>${message}</div>
+      </div>`;
+  }
+
+  /** Return a CSS class for a grade badge */
+  function gradeBadgeClass(grade) {
+    if (!grade || grade === 'N/A') return 'badge-na';
+    const g = grade.toUpperCase();
+    if (g.startsWith('A')) return 'badge-a';
+    if (g.startsWith('B')) return 'badge-b';
+    return 'badge-c';
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+   *  TAB SWITCHING
+   * ══════════════════════════════════════════════════════════════════ */
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach((b,i) => {
+      b.classList.toggle('active', (i === 0 && tab === 'students') || (i === 1 && tab === 'register'));
+    });
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+   *  Q1 — GET /api/students  →  Render student table
+   * ══════════════════════════════════════════════════════════════════ */
+  async function fetchStudents() {
+    const container  = document.getElementById('table-container');
+    const statusDiv  = document.getElementById('list-status');
+    const metaRow    = document.getElementById('meta-row');
+    const countBadge = document.getElementById('student-count');
+
+    // Show loading spinner
+    container.innerHTML = '<div class="spinner"></div>';
+    statusDiv.innerHTML = '';
+    metaRow.style.display = 'none';
+
+    try {
+      /* ── HTTP GET request ───────────────────────────── */
+      const response = await fetch(`${API_BASE}/students`);
+
+      /* ── Handle HTTP status codes ───────────────────── */
+      if (response.status === 200) {
+        const json = await response.json();
+
+        if (!json.data || json.data.length === 0) {
+          showAlert('list-status', 'warn', '⚠️', 'No students found in the database.');
+          container.innerHTML = '';
+          return;
+        }
+
+        // Update count badge & show meta row
+        countBadge.textContent = `${json.count} student${json.count !== 1 ? 's' : ''} found`;
+        metaRow.style.display = 'flex';
+
+        // Build table
+        const rows = json.data.map(s => `
+          <tr>
+            <td>${s.id}</td>
+            <td><strong style="color:#fff">${escHtml(s.name)}</strong></td>
+            <td>${s.age}</td>
+            <td>${escHtml(s.email)}</td>
+            <td>${escHtml(s.course)}</td>
+            <td><span class="badge ${gradeBadgeClass(s.grade)}">${escHtml(s.grade)}</span></td>
+          </tr>`).join('');
+
+        container.innerHTML = `
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Age</th>
+                  <th>Email</th>
+                  <th>Course</th>
+                  <th>Grade</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>`;
+
+        showAlert('list-status', 'success', '✅',
+          `<strong>HTTP 200 OK</strong> — ${json.count} student record(s) retrieved successfully.`);
+
+      } else if (response.status === 404) {
+        showAlert('list-status', 'error', '🔍', '<strong>HTTP 404 Not Found</strong> — The API endpoint was not found.');
+        container.innerHTML = '';
+
+      } else {
+        showAlert('list-status', 'warn', '⚠️',
+          `<strong>HTTP ${response.status}</strong> — Unexpected response from server.`);
+        container.innerHTML = '';
+      }
+
+    } catch (err) {
+      /* ── Network / connection error ─────────────────── */
+      showAlert('list-status', 'error', '🚫',
+        `<strong>Connection Error</strong> — Could not reach the API server.<br/>
+         <small>Make sure the server is running: <code>node server.js</code></small>`);
+      container.innerHTML = '';
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+   *  Q2 — POST /api/students  →  Register a new student
+   * ══════════════════════════════════════════════════════════════════ */
+  document.getElementById('register-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    // Clear previous errors
+    clearFieldErrors();
+    document.getElementById('form-status').innerHTML = '';
+
+    // Collect form data
+    const payload = {
+      name:   document.getElementById('f-name').value.trim(),
+      age:    document.getElementById('f-age').value,
+      email:  document.getElementById('f-email').value.trim(),
+      course: document.getElementById('f-course').value.trim(),
+      grade:  document.getElementById('f-grade').value,
+    };
+
+    // Client-side quick validation
+    let clientErrors = false;
+    if (!payload.name)   { setFieldError('name',  'Full name is required.');   clientErrors = true; }
+    if (!payload.age)    { setFieldError('age',   'Age is required.');          clientErrors = true; }
+    if (!payload.email)  { setFieldError('email', 'Email is required.');        clientErrors = true; }
+    if (!payload.course) { setFieldError('course','Course is required.');       clientErrors = true; }
+    if (clientErrors) return;
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Registering…';
+
+    try {
+      /* ── HTTP POST request with JSON body ───────────── */
+      const response = await fetch(`${API_BASE}/students`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+      });
+
+      const json = await response.json();
+      showRawResponse(json);
+
+      /* ── Handle HTTP status codes ───────────────────── */
+      if (response.status === 201) {
+        // Success!
+        showAlert('form-status', 'success', '🎉',
+          `<strong>HTTP 201 Created</strong> — ${json.message}<br/>
+           Student ID assigned: <strong>#${json.data.id}</strong>`);
+        this.reset();
+
+      } else if (response.status === 400) {
+        // Validation error from server
+        const errList = json.errors ? json.errors.map(e => `• ${e}`).join('<br/>') : json.message;
+        showAlert('form-status', 'error', '❌',
+          `<strong>HTTP 400 Bad Request</strong> — ${json.message}<br/><small>${errList}</small>`);
+
+      } else if (response.status === 409) {
+        // Duplicate
+        showAlert('form-status', 'warn', '⚠️',
+          `<strong>HTTP 409 Conflict</strong> — ${json.message}`);
+
+      } else {
+        showAlert('form-status', 'error', '🚫',
+          `<strong>HTTP ${response.status}</strong> — ${json.message || 'Unexpected server error.'}`);
+      }
+
+    } catch (err) {
+      showAlert('form-status', 'error', '🚫',
+        `<strong>Connection Error</strong> — Could not reach the API server.<br/>
+         <small>Make sure the server is running: <code>node server.js</code></small>`);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '✅ Register Student';
+    }
+  });
+
+  /* ── Helpers ──────────────────────────────────────── */
+  function setFieldError(field, msg) {
+    document.getElementById('f-' + field).classList.add('error-field');
+    document.getElementById('err-' + field).textContent = msg;
+  }
+  function clearFieldErrors() {
+    ['name','age','email','course'].forEach(f => {
+      document.getElementById('f-' + f).classList.remove('error-field');
+      document.getElementById('err-' + f).textContent = '';
+    });
+  }
+  function resetForm() {
+    document.getElementById('register-form').reset();
+    clearFieldErrors();
+    document.getElementById('form-status').innerHTML = '';
+    document.getElementById('response-card').style.display = 'none';
+  }
+  function showRawResponse(json) {
+    document.getElementById('response-card').style.display = 'block';
+    document.getElementById('response-pre').textContent = JSON.stringify(json, null, 2);
+  }
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── Auto-load students on page ready ─────────────── */
+  fetchStudents();
+</script>
+
+</body>
+</html>
+
